@@ -60,18 +60,16 @@ RUN		apk add openrc
 RUN	adduser -S nginx &&	addgroup -S nginx
 COPY conf/php-fpm.conf /etc/php7/php-fpm.conf
 COPY conf/www.conf /etc/php7/php-fpm.d/www.conf
-#COPY /etc/php/8.1/fpm/php-fpm.conf /etc/php7/php-fpm.conf
-#COPY /etc/php/8.1/fpm/pool.d/www.conf /etc/php7/php-fpm.d/www.conf
 
 # install wordpress
 RUN wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 RUN chmod +x wp-cli.phar
 RUN cp wp-cli.phar /usr/local/bin/wp
 
-WORKDIR /var/www/html/wordpress
+WORKDIR /var/www/html
 
-#RUN chown -R 1000 /var/www/html
 
 COPY conf/configure.sh /tmp/configure.sh
+
 ENTRYPOINT [ "sh", "/tmp/configure.sh" ]
 

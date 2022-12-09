@@ -1,64 +1,46 @@
-version: '3'
+version: "3.5"
 
 services:
   mariadb:
-    build: requirements/mariadb/
     container_name: mariadb
-    env_file: .env
+    build: ./requirements/mariadb/
+    image: mariadb
+    env_file:
+      - .env
     restart: always
-    ports:
-      - "3306"
     volumes:
       - database:/var/lib/mysql
     networks:
-      - backend
-    environment:
-      WP_DATABASE_NAME: ${WP_DATABASE_NAME}
-      WP_DATABASE_USER: ${WP_DATABASE_USER}
-      WP_DATABASE_PASSWORD: ${WP_DATABASE_PASSWORD}
-      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      - network
 
   wordpress:
-    build: requirements/wordpress/
     container_name: wordpress
-    env_file: .env
+    build: ./requirements/wordpress/
+    image: wordpress
+    env_file:
+      - .env
     depends_on:
        -  mariadb
     restart: always
     volumes:
       - files:/var/www/html
-    ports:
-      - "9000:9000"
     networks:
-      - frontend
-      - backend
-    environment:
-      MARIADB_ROOT_HOST: ${MARIADB_ROOT_HOST}
-      DOMAIN_NAME: ${DOMAIN_NAME}
-      WP_DATABASE_NAME: ${WP_DATABASE_NAME}
-      WP_DATABASE_USER: ${WP_DATABASE_USER}
-      WP_DATABASE_PASSWORD: ${WP_DATABASE_PASSWORD}
-      WP_TITLE: ${WP_TITLE}
-      WP_ADMIN_USERNAME: ${WP_ADMIN_USERNAME}
-      WP_ADMIN_EMAIL: ${WP_ADMIN_EMAIL}
-      WP_ADMIN_PASSWORD: ${WP_ADMIN_PASSWORD}
-      WP_USERNAME: ${WP_USERNAME}
-      WP_EMAIL: ${WP_EMAIL}
-      WP_PASSWORD: ${WP_PASSWORD}
+      - network
   nginx:
-    build: requirements/nginx/
     container_name: nginx
-    env_file: .env
+    build: ./requirements/nginx/
+    image: nginx
+    env_file: 
+      - .env
     restart: always
     depends_on:
       - mariadb
     volumes:
       - files:/var/www/html
     ports:
-      - "80"
-      - 443:443
+      - "443:443"
     networks:
-      - frontend
+      - network
 
 volumes:
   files:
@@ -72,10 +54,7 @@ volumes:
       device: "/home/maroly/data/database"
       o: bind
     
-      #networks:
-      #  inception:
-      #    name: inception
-      #    driver: bridge
 networks:
-  frontend:
-  backend:
+  network:
+    name: network
+    driver: bridge
